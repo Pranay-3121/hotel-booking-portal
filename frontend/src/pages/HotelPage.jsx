@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { createBooking, getHotel } from '../api';
 import { addDays, formatDate, formatINR, todayISO } from '../utils';
+import AlternativeDates from '../components/AlternativeDates';
 
 export default function HotelPage() {
   const { id } = useParams();
@@ -43,7 +44,7 @@ export default function HotelPage() {
     }
   }, [id, checkIn, checkOut]);
 
-    useEffect(() => {
+  useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
@@ -121,12 +122,24 @@ export default function HotelPage() {
 
           {dateError && <p className="notice notice-error">{dateError}</p>}
           {!checkIn && !checkOut && <p className="muted small">Select your dates to see availability and price.</p>}
-          {soldOut && <p className="notice notice-error">No rooms available for these dates. Try different dates.</p>}
+
+          {soldOut && (
+            <>
+              <p className="notice notice-error">No rooms available for these dates.</p>
+              <AlternativeDates
+                hotelId={hotel.id}
+                checkIn={checkIn}
+                checkOut={checkOut}
+                onPick={(inDate, outDate) => setDates(inDate, outDate)}
+              />
+            </>
+          )}
+
           {canBook && hotel.availableRooms <= 2 && (
             <p className="notice notice-warn">Hurry: only {hotel.availableRooms} room{hotel.availableRooms > 1 ? 's' : ''} left!</p>
           )}
 
-          {hasQuote && (
+          {canBook && (
             <div className="summary">
               <div className="row-between">
                 <span>{formatINR(hotel.pricePerNight)} x {hotel.nights} night{hotel.nights > 1 ? 's' : ''}</span>

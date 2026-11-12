@@ -1,5 +1,6 @@
 package com.hotel.backend.service;
 
+import com.hotel.backend.dto.AlternativeStay;
 import com.hotel.backend.dto.HotelResponse;
 import com.hotel.backend.entity.Hotel;
 import com.hotel.backend.entity.RoomInventory;
@@ -19,6 +20,9 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class HotelService {
 
+    private static final int ALTERNATIVES_MAX_SHIFT = 7;
+    private static final int ALTERNATIVES_LIMIT = 3;
+
     private final HotelRepository hotelRepository;
     private final RoomInventoryRepository inventoryRepository;
     private final Clock clock;
@@ -33,9 +37,32 @@ public class HotelService {
 
     public HotelResponse get(Long id, LocalDate checkIn, LocalDate checkOut) {
         validateOptionalDates(checkIn, checkOut);
-        Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> ApiException.notFound("HOTEL_NOT_FOUND", "Hotel not found."));
+        Hotel hotel = findHotel(id);
         return toResponse(hotel, checkIn, checkOut);
+    }
+
+    /** Surprise feature: same-length stays close to the requested dates that still have a room. */
+    public List<AlternativeStay> alternatives(Long id, LocalDate checkIn, LocalDate checkOut) {
+        LocalDate today = LocalDate.now(clock);
+        BookingRules.validateStay(checkIn, checkOut, today);
+        Hotel hotel = findHotel(id);
+
+        int nights = BookingRules.nights(checkIn, checkOut);
+        // One query for the whole search window instead of one per candidate
+        List<RoomInventory> rows = inventoryRepository.findStay(id,
+                checkIn.minusDays(ALTERNATIVES_MAX_SHIFT), checkOut.plusDays(ALTERNATIVES_MAX_SHIFT));
+
+        return BookingRules.findAlternatives(rows, checkIn, nights, today,
+                        ALTERNATIVES_MAX_SHIFT, ALTERNATIVES_LIMIT).stream()
+                .map(a -> new AlternativeStay(a.checkIn(), a.checkIn().plusDays(nights), nights,
+                        BookingRules.totalAmount(hotel.getPricePerNight(), nights),
+                        a.availableRooms(), a.shiftDays()))
+                .toList();
+    }
+
+    private Hotel findHotel(Long id) {
+        return hotelRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound("HOTEL_NOT_FOUND", "Hotel not found."));
     }
 
     private HotelResponse toResponse(Hotel hotel, LocalDate checkIn, LocalDate checkOut) {

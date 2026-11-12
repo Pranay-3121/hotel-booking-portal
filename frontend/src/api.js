@@ -59,3 +59,5 @@ export const cancelBooking = (reference, email) =>
   request(`/bookings/${encodeURIComponent(reference)}/cancel`, {
     method: 'POST', body: JSON.stringify({ email }),
   });
+  export const getAlternatives = (id, checkIn, checkOut) =>
+  request(`/hotels/${id}/alternatives${query({ checkIn, checkOut })}`);

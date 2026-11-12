@@ -1,5 +1,6 @@
 package com.hotel.backend.controller;
 
+import com.hotel.backend.dto.AlternativeStay;
 import com.hotel.backend.dto.HotelResponse;
 import com.hotel.backend.service.HotelService;
 import lombok.RequiredArgsConstructor;
@@ -30,5 +31,13 @@ public class HotelController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut) {
         return hotelService.get(id, checkIn, checkOut);
+    }
+
+    @GetMapping("/{id}/alternatives")
+    public List<AlternativeStay> alternatives(
+            @PathVariable Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut) {
+        return hotelService.alternatives(id, checkIn, checkOut);
     }
 }

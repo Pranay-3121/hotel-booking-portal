@@ -70,3 +70,8 @@ input:focus { outline: 2px solid #93c5fd; border-color: #2563eb; }
 .details { display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; margin: 16px 0 0; }
 .details dt { color: #6b7280; }
 .details dd { margin: 0; }
+.alternatives { margin: 12px 0; }
+.alt-title { font-weight: 600; margin-bottom: 8px; }
+.alt-option { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; text-align: left; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.95rem; cursor: pointer; color: inherit; }
+.alt-option:hover { background: #dcfce7; }
+.alt-price { font-weight: 700; white-space: nowrap; }
