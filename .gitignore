@@ -1,0 +1,12 @@
+# secrets and local config
+application-local.properties
+.env
+
+# build output
+target/
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
