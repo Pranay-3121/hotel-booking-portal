@@ -1,0 +1,2 @@
+spring.datasource.username=hotel_app
+spring.datasource.password=your-password-here
